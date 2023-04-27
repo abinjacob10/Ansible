@@ -1,0 +1,17 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  
+  - name: update apt repository index
+    apt:
+      update_cache: yes
+  - name: uninstall apache2 webserver package
+    apt:
+      name: apache2 
+      state: absent
+  - name: uninstall php support package for apache
+    apt:
+      name: libapache2-mod-php
+      state: absent
