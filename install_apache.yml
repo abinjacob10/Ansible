@@ -3,15 +3,14 @@
 - hosts: all
   become: true
   tasks:
-  
-  - name: update apt repository index
-    apt:
-      update_cache: yes
-  - name: install apache2 webserver package
-    apt:
-      name: apache2 
-      state: latest
-  - name: add php support package for apache
-    apt:
-      name: libapache2-mod-php
-      state: latest
+   - name: update repository
+     apt:
+       update_cache: yes
+   - name: install apache2 webserver package
+     apt:
+       name: apache2
+       state: latest
+   - name: install php package(support for apache2)
+     apt:
+       name: libapache2-mod-php
+       state: latest
