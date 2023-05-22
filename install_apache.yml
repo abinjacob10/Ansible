@@ -3,14 +3,20 @@
 - hosts: all
   become: true
   tasks:
-   - name: update repository
+   - name: install apache2 webserver and php package using apt
      apt:
+       name:
+         - apache2
+         - libapache2-mod-php
+       state: latest
        update_cache: yes
-   - name: install apache2 webserver package
-     apt:
-       name: apache2
+     when: ansible_facts['distribution'] == "Ubuntu"
+
+   - name: install apache2 webserver and php package using dnf
+     yum:
+       name:
+         - httpd
+         - php
        state: latest
-   - name: install php package(support for apache2)
-     apt:
-       name: libapache2-mod-php
-       state: latest
+       update_cache: yes
+     when: ansible_facts['distribution'] == "CentOS"
