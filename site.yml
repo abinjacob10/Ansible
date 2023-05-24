@@ -23,13 +23,30 @@
   tasks:
 
   - name: install apache2 webserver and php package using apt
-    when: ansible_facts['distribution'] == "Ubuntu"
     tags: apache, ubuntu
     apt:
       name:
         - apache2
         - libapache2-mod-php
       state: latest
+
+  - name: copy site1.html as index.html
+    tags: apache,apache2, httpd
+    copy:
+      src: site1.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: copy css1.css as css1.css
+    tags: apache,apache2, httpd
+    copy:
+      src: css1.css
+      dest: /var/www/html/css1.css
+      owner: root
+      group: root
+      mode: 0644
 
 - hosts: db_servers
   become: true
