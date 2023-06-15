@@ -1,0 +1,48 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install updates (CentOS)
+    when: ansible_distribution == "CentOS"
+    tags: always
+    yum:
+      update_only: yes
+      update_cache: yes
+
+  - name: install updates (Ubuntu)
+    when: ansible_distribution == "Ubuntu"
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Create group "ansible1"
+    ansible.builtin.group:
+      name: ansible1
+      state: present
+      gid: 1005
+
+  - name: attach hurling to ansible1
+    ansible.builtin.user:
+      name: hurling
+      uid: 1010
+      group: ansible1
+
+  - name: add ssh key for hurling
+    ansible.posix.authorized_key:
+      user: hurling
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDNcZuLwINLEDQw82r1rvg2WzhMF4WjhS5ZNJighK0jq Ansible"
+
+  - name: add sudoers file for hurling user
+    copy:
+      src: sudoer_hurling
+      dest: /etc/sudoers.d/hurling
+      owner: root
+      group: root
+      mode: 0440

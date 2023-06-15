@@ -1,6 +1,9 @@
+[workstation]
+192.168.1.24
+
 [web_servers]
 192.168.1.25
-
-[db_servers]
 192.168.1.26
 
+[db_servers]
+192.168.1.29
