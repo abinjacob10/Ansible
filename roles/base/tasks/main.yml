@@ -2,3 +2,12 @@
   ansible.posix.authorized_key:
     user: hurling
     key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDNcZuLwINLEDQw82r1rvg2WzhMF4WjhS5ZNJighK0jq Ansible"
+
+- name: generate sshd_config file basd on a template
+  template:
+    src: "{{ ssh_template_file }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_sshd
