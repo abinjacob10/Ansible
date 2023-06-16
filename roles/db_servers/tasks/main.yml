@@ -1,0 +1,6 @@
+- name: install mariadb in database server. We have only Ubuntu as DB server
+  when: ansible_distribution == "Ubuntu"
+  tags: db,ubuntu,mariadb
+  apt:
+    name: mariadb-server
+    state: latest

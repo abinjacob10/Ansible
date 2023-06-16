@@ -1,0 +1,118 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update repository cache (CentOS)
+    when: ansible_distribution == "CentOS"
+    tags: always
+    yum:
+      update_cache: yes
+    changed_when: false
+
+  - name: update repository cache (Ubuntu)
+    when: ansible_distribution == "Ubuntu"
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for hurling
+    ansible.posix.authorized_key:
+      user: hurling
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDNcZuLwINLEDQw82r1rvg2WzhMF4WjhS5ZNJighK0jq Ansible"
+
+- hosts: workstation
+  become: true
+  tasks:
+
+  - name: install unzip package
+    package:
+      name: unzip
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip
+      dest: /usr/local/bin/
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache2 webserver and php package using apt
+    when: ansible_distribution == "Ubuntu"
+    tags: apache, ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+
+  - name: install httpd webserver and php package using yum
+    when: ansible_distribution == "CentOS"
+    tags: httpd, centos
+    yum:
+      name:
+        - httpd
+        - php
+      state: latest
+
+  - name: start web service in CentOS
+    when: ansible_distribution == "CentOS"
+    tags: httpd, centos
+    service:
+      name: httpd
+      state: started
+      enabled: true
+
+  - name: change a line in httpd.conf using lineinfile module
+    when: ansible_distribution == "CentOS"
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: "ServerAdmin ready123.net"
+    register: httpdconf
+
+  - name: restart httpd based on a chnage in registered variable httpd.conf-change
+    when: httpdconf.changed
+    service:
+      name: httpd
+      state: restarted
+
+  - name: copy site1.html as index.html
+    tags: apache,apache2, httpd
+    copy:
+      src: site1.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: copy css1.css as css1.css
+    tags: apache,apache2, httpd,css
+    copy:
+      src: css1.css
+      dest: /var/www/html/css1.css
+      owner: root
+      group: root
+      mode: 0644
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariadb in database server. We have only Ubuntu as DB server
+    when: ansible_distribution == "Ubuntu"
+    tags: db,ubuntu,mariadb
+    apt:
+      name: mariadb-server
+      state: latest

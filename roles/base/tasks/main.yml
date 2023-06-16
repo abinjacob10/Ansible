@@ -1,0 +1,4 @@
+- name: add ssh key for hurling
+  ansible.posix.authorized_key:
+    user: hurling
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDNcZuLwINLEDQw82r1rvg2WzhMF4WjhS5ZNJighK0jq Ansible"
