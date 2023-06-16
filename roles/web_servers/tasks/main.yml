@@ -1,26 +1,26 @@
 - name: install apache2 webserver and php package using apt
   when: ansible_distribution == "Ubuntu"
   tags: apache, ubuntu
-  apt:
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ web_package }}"
+      - "{{ php_package }}"
     state: latest
 
 - name: install httpd webserver and php package using yum
   when: ansible_distribution == "CentOS"
   tags: httpd, centos
-  yum:
+  package:
     name:
-      - httpd
-      - php
+      - "{{ web_package }}"
+      - "{{ php_package }}"
     state: latest
 
-- name: start web service in CentOS
+- name: start web service in CentOS, not necessay for Ubuntu, apache2 serice starts automatically
   when: ansible_distribution == "CentOS"
   tags: httpd, centos
   service:
-    name: httpd
+    name: "{{ web_service }}"
     state: started
     enabled: true
 
@@ -29,14 +29,8 @@
   lineinfile:
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin'
-    line: "ServerAdmin ready123.net"
-  register: httpdconf
-
-- name: restart httpd based on a chnage in registered variable httpd.conf-change
-  when: httpdconf.changed
-  service:
-    name: httpd
-    state: restarted
+    line: "ServerAdmin ready123.click"
+  notify: restart_httpd
 
 - name: copy site1.html as index.html
   tags: apache,apache2, httpd
@@ -55,11 +49,3 @@
     owner: root
     group: root
     mode: 0644
-
-- name: add sudoers file for hurling user
-  copy:
-    src: sudoer_hurling
-    dest: /etc/sudoers.d/hurling
-    owner: root
-    group: root
-    mode: 0440
